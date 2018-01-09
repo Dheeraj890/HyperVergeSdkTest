@@ -25,6 +25,9 @@ import java.io.File;
 
 import co.hyperverge.hyperdocssdk.workflows.ocr.activities.CameraActivity;
 
+
+
+
 public class MainActivity extends AppCompatActivity implements BaseApplication.PermissionCallInterface {
     private static final int REQ_CAMERA_IMAGE = 10;
     public BaseApplication.PermissionCallInterface mPermissionCallInterface;
