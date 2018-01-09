@@ -1,0 +1,5 @@
+<resources>
+	<dimen name="layout_height">192dp</dimen>
+	<dimen name="pancard_margin_start">139.2dp</dimen>
+	<dimen name="frame_margin">12dp</dimen>
+</resources>
