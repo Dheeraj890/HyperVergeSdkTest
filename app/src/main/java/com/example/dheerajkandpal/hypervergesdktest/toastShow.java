@@ -8,42 +8,35 @@
             }
         }));
 
-        // Map to track latest known balanceUnits
+        // Track latest known balanceUnits
         Map<String, Double> latestBalances = new LinkedHashMap<>();
 
-        // Final result
-        List<Document> transformed = new ArrayList<>();
-
+        // Update each entry in-place
         for (Document entry : planUnitsBySubFunds) {
             String date = entry.getString("date");
             List<Document> currentUnits = (List<Document>) entry.get("unitsBySubFundId");
 
-            // Update latest balances
+            // Create a map for current date's subFundId -> balanceUnits
+            Map<String, Double> currentMap = new HashMap<>();
             for (Document unit : currentUnits) {
                 String subFundId = unit.getString("subFundId");
                 Double balance = unit.getDouble("balanceUnits");
-                latestBalances.put(subFundId, balance);
+                currentMap.put(subFundId, balance);
+                latestBalances.put(subFundId, balance); // update latest known
             }
 
-            // Create new list with all known subFundIds up to this date
-            List<Document> newUnitsList = new ArrayList<>();
-            for (Map.Entry<String, Double> e : latestBalances.entrySet()) {
-                String subFundId = e.getKey();
-                // If the current date has an updated value, use that
-                Double balance = latestBalances.get(subFundId);
-                for (Document unit : currentUnits) {
-                    if (unit.getString("subFundId").equals(subFundId)) {
-                        balance = unit.getDouble("balanceUnits");
-                        break;
-                    }
-                }
-                newUnitsList.add(new Document("subFundId", subFundId).append("balanceUnits", balance));
+            // Build updated list using all known subFundIds up to this point
+            List<Document> updatedUnits = new ArrayList<>();
+            for (String subFundId : latestBalances.keySet()) {
+                Double balance = currentMap.getOrDefault(subFundId, latestBalances.get(subFundId));
+                updatedUnits.add(new Document("subFundId", subFundId).append("balanceUnits", balance));
             }
 
-            transformed.add(new Document("date", date).append("unitsBySubFundId", newUnitsList));
+            // Replace unitsBySubFundId with updated version
+            entry.put("unitsBySubFundId", updatedUnits);
         }
 
         // Print final result
-        for (Document d : transformed) {
+        for (Document d : planUnitsBySubFunds) {
             System.out.println(d.toJson());
         }
